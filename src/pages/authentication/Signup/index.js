@@ -3,7 +3,7 @@ import { View, Text, Button } from 'react-native';
 
 import styles from './styles';
 
-export default function Signup (){
+const Signup = () => {
     return(
         <View style={styles.signup}>
             <Text>
@@ -13,3 +13,5 @@ export default function Signup (){
         </View>
     );
 }
+
+export default Signup;

@@ -1,40 +1,123 @@
-import React from 'react';
-import { createSwitchNavigator, NavigationContainer } from '@react-navigation/native';
+import React, { useState, useEffect, useMemo, useRef, useReducer } from 'react';
+import { View, ActivityIndicator } from 'react-native';
+import * as SecureStore from 'expo-secure-store';
 
 import AppNavigation from './navigation/AppNavigation';
 import AuthNavigation from './navigation/AuthNavigation';
 
-import { isSignedIn } from "./auth";
-import { render } from 'react-dom';
+import { AuthContext } from './components/Context';
+import { getToken } from './auth';
 
-export default class Routes extends React.Component {
-    constructor(props){
-        super(props);
-    
-        this.state = {
-          signedIn: false,
-          checkedSignIn: false
-        };
+const Routes = () => {
+    const isMountedRef = useRef(null);
+
+    const initialLoginState = {
+        isLoading: true,
+        userToken: null,
     };
 
-    componentDidMount(){
-        isSignedIn();
-        //   .then(res => this.setState({ signedIn: res, checkedSignIn: true }))
-        //   .catch(err => alert("An error occurred"));
-    };
-    
-    render(){
-        const { checkedSignIn, signedIn } = this.state;
-
-        // If we haven't checked AsyncStorage yet, don't render anything (better ways to do this)
-        // if (!checkedSignIn) {
-        //     return null;
-        // }
-
-        if (signedIn) {
-            return (<NavigationContainer><AppNavigation /></NavigationContainer>);
-        } else {
-            return (<NavigationContainer><AuthNavigation /></NavigationContainer>);
+    const loginReducer = (prevState, action) => {
+        switch( action.type ) {
+            case 'RETRIEVE_TOKEN':
+                return{
+                    ... prevState,
+                    userToken: action.userToken,
+                    isLoading: false,
+                };
+            case 'LOGIN':
+                return{
+                    ... prevState,
+                    userToken: action.userToken,
+                    isLoading: false,
+                };
+            case 'LOGOUT':
+                return{
+                    ... prevState,
+                    userToken: null,
+                    isLoading: false,
+                };
+            case 'REGISTER':
+                return{
+                    ... prevState,
+                    userToken: action.userToken,
+                    isLoading: false,
+                };
         }
     }
+
+    const [loginState, dispatch] = useReducer(loginReducer, initialLoginState);
+
+    const authContext = useMemo(() => ({
+        signIn: async (email, password) => {
+            let token;
+            token = null;
+
+            let data = {
+                email: email,
+                password: password,
+            };
+
+            //getting the acess token
+            const response = await getToken(data);
+            
+            //if everything is fine
+            if (response.status === 200) {
+                //then save the token in local storage
+                token = response.data.acess_token;
+                await SecureStore.setItemAsync("authorization", token);
+            } 
+            else if (response.status === 401)
+                console.log("Wrong email or password");
+
+            dispatch({type: "LOGIN", userToken: token});
+        },
+        signOut: async () => {
+            try {
+                token = await SecureStore.deleteItemAsync("authorization");
+            } catch(error){
+                console.log(error);
+            }
+
+            dispatch({type: "LOGOUT"})
+        },
+        signUp: () => {
+            setUserToken('dasdas');
+            //setIsLoading(false);
+        },
+    }), []);
+
+    useEffect(() => {
+        isMountedRef.current = true;
+        setTimeout(async () => {
+            if(isMountedRef.current){
+                let token;
+                token = null;
+
+                try {
+                    token = await SecureStore.getItemAsync("authorization");
+                } catch(error){
+                    console.log(error);
+                }
+
+                dispatch({type: "RETRIEVE_TOKEN", userToken: token})
+            }
+        }, 500);
+    }, []);
+
+    if(loginState.isLoading){
+        return(
+            <View style={{flex: 1, justifyContent: "center", alignItems: "center"}}>
+                <ActivityIndicator size="large"/>
+            </View>
+        );
+    }
+
+    return(
+        //value={authContext} pass our auth functions to the other components
+        <AuthContext.Provider value={authContext}>
+            { loginState.userToken !== null ? (<AppNavigation />) : (<AuthNavigation/>) }
+        </AuthContext.Provider>
+    );
 };
+
+export default Routes;
