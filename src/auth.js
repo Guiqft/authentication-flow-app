@@ -1,7 +1,6 @@
+import { useMemo } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import api from './services/api';
-
-export const USER_KEY = "authentication";
 
 export async function getToken(data) {
     const headers = {
@@ -19,4 +18,4 @@ export async function getToken(data) {
     } catch (err) {
         return(err.response);
     }
-}
+};

@@ -1,11 +1,10 @@
-import React, { Fragment, useContext } from 'react';
+import React, { Fragment, useContext, useState } from 'react';
 import { View } from 'react-native';
 import { Button } from 'react-native-elements';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 
 import { AuthContext } from '../../../components/Context';
-import { getToken } from '../../../auth';
 
 import styles from './styles';
 
@@ -14,7 +13,7 @@ import FormInput from '../../../components/FormInput';
 import FormButton from '../../../components/FormButton';
 import ErrorMessage from '../../../components/ErrorMessage';
 
-//to validate the inputs and show error messages
+//to validate inputs and show error messages
 const validationSchema = Yup.object().shape({
   email: Yup.string()
     .label('Email')
@@ -29,6 +28,8 @@ const validationSchema = Yup.object().shape({
 const Login = ({ navigation }) => {
   const { signIn } = useContext(AuthContext);
 
+  const [ loginError, setLoginError ] = useState(false);
+
   return (
     <View style={styles.container}>
       <Formik
@@ -36,10 +37,12 @@ const Login = ({ navigation }) => {
         validationSchema={validationSchema}
 
         //'data' gives acess to 'initialValues'
-        onSubmit = { async (data, { setSubmitting }) => {
-          setSubmitting(true);
-          signIn(data.email, data.password);
-          setSubmitting(false);
+        onSubmit = { async (data) => {
+          var statusCode;
+          //calling the sigIn from our context, passing form inputs as parameter
+          statusCode = await signIn(data.email, data.password);
+          if (statusCode === 401) setLoginError(true);
+          else if (statusCode === 200) setLoginError(false);
         }}
       >
         {formikProps => (
@@ -70,6 +73,11 @@ const Login = ({ navigation }) => {
             />
             <ErrorMessage errorValue={formikProps.touched.password && formikProps.errors.password} />
 
+            { loginError === true ? (
+              <ErrorMessage errorValue="Wrong e-mail or password. Try again."/>) : (
+              <View />)
+            }
+            
             <View style={styles.buttonContainer}>
               <FormButton
                 buttonType='outline'
@@ -77,7 +85,7 @@ const Login = ({ navigation }) => {
                 buttonColor='#039BE5'
                 onPress={formikProps.submitForm}
                 //this change the button color to grey if the fileds arent valids or to waiting the auth server response
-                disabled={!formikProps.isValid || formikProps.isSubmitting}  />
+                disabled={!formikProps.isValid}/>
             </View>
           </Fragment>
         )}

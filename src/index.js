@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef, useReducer } from 'react';
+import React, { useEffect, useMemo, useReducer } from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 
@@ -9,36 +9,34 @@ import { AuthContext } from './components/Context';
 import { getToken } from './auth';
 
 const Routes = () => {
-    const isMountedRef = useRef(null);
-
     const initialLoginState = {
         isLoading: true,
         userToken: null,
     };
 
     const loginReducer = (prevState, action) => {
-        switch( action.type ) {
+        switch (action.type) {
             case 'RETRIEVE_TOKEN':
-                return{
-                    ... prevState,
+                return {
+                    ...prevState,
                     userToken: action.userToken,
                     isLoading: false,
                 };
             case 'LOGIN':
-                return{
-                    ... prevState,
+                return {
+                    ...prevState,
                     userToken: action.userToken,
                     isLoading: false,
                 };
             case 'LOGOUT':
-                return{
-                    ... prevState,
+                return {
+                    ...prevState,
                     userToken: null,
                     isLoading: false,
                 };
             case 'REGISTER':
-                return{
-                    ... prevState,
+                return {
+                    ...prevState,
                     userToken: action.userToken,
                     isLoading: false,
                 };
@@ -56,66 +54,65 @@ const Routes = () => {
                 email: email,
                 password: password,
             };
-
+        
             //getting the acess token
             const response = await getToken(data);
-            
+        
             //if everything is fine
             if (response.status === 200) {
                 //then save the token in local storage
                 token = response.data.acess_token;
                 await SecureStore.setItemAsync("authorization", token);
-            } 
-            else if (response.status === 401)
+            }
+            else if (response.status === 401){
                 console.log("Wrong email or password");
+            }
+            
+            dispatch({ type: "LOGIN", userToken: token });
 
-            dispatch({type: "LOGIN", userToken: token});
+            return response.status;
         },
         signOut: async () => {
             try {
-                token = await SecureStore.deleteItemAsync("authorization");
-            } catch(error){
+                await SecureStore.deleteItemAsync("authorization");
+            } catch (error) {
                 console.log(error);
             }
 
-            dispatch({type: "LOGOUT"})
+            dispatch({ type: "LOGOUT" });
         },
         signUp: () => {
             setUserToken('dasdas');
-            //setIsLoading(false);
         },
     }), []);
 
     useEffect(() => {
-        isMountedRef.current = true;
         setTimeout(async () => {
-            if(isMountedRef.current){
-                let token;
-                token = null;
+            let token;
+            token = null;
 
-                try {
-                    token = await SecureStore.getItemAsync("authorization");
-                } catch(error){
-                    console.log(error);
-                }
-
-                dispatch({type: "RETRIEVE_TOKEN", userToken: token})
+            try {
+                token = await SecureStore.getItemAsync("authorization");
+            } catch(error){
+                console.log(error);
             }
+
+            dispatch({type: "RETRIEVE_TOKEN", userToken: token});
         }, 500);
     }, []);
 
-    if(loginState.isLoading){
-        return(
-            <View style={{flex: 1, justifyContent: "center", alignItems: "center"}}>
-                <ActivityIndicator size="large"/>
+    if (loginState.isLoading) {
+        return (
+            <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                <ActivityIndicator size="large" />
             </View>
         );
     }
 
-    return(
+    return (
         //value={authContext} pass our auth functions to the other components
         <AuthContext.Provider value={authContext}>
-            { loginState.userToken !== null ? (<AppNavigation />) : (<AuthNavigation/>) }
+            {loginState.userToken !== null ? (<AppNavigation />) : (<AuthNavigation />)}
         </AuthContext.Provider>
     );
 };
