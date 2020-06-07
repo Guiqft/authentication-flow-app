@@ -1,7 +1,6 @@
 import React from 'react';
 import { Input } from 'react-native-elements';
 import { StyleSheet, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 
 const FormInput = ({
     iconName,
@@ -16,23 +15,20 @@ const FormInput = ({
     <View style={styles.inputContainer}>
         <Input
             {...rest} //place {...rest} before the new props, so they can be replaced
-            leftIcon={<Ionicons name={iconName} size={28} color={iconColor} />}
-            leftIconContainerStyle={styles.iconStyle}
-            placeholderTextColor='grey'
+            placeholderTextColor="#a4a4a4"
             name={name}
             value={value}
             placeholder={placeholder}
-            style={styles.input}
+            inputStyle={styles.input}
         />
     </View>
 );
 
 const styles = StyleSheet.create({
     inputContainer: {
-        margin: 15
+        marginHorizontal: 10,
     },
-    iconStyle: {
-        marginRight: 10
+    input: {
     }
 });
   
