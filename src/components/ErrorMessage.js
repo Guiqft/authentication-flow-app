@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { render } from 'react-dom';
 
 const ErrorMessage = ({ errorValue }) => {
     return(
@@ -12,7 +11,9 @@ const ErrorMessage = ({ errorValue }) => {
 
 const styles = StyleSheet.create({
     container: {
-        marginLeft: 25
+        marginLeft: 25,
+        marginTop: -15,
+        marginBottom: 5
     },
     errorText: {
         color: 'red'

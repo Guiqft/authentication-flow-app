@@ -16,6 +16,7 @@ export default StyleSheet.create({
     fontWeight: "bold",
     textTransform: "uppercase",
     marginTop: screenHeight * 0.10,
+    alignSelf: "center"
   },
   formContainer:{
     marginTop: screenHeight * 0.15,
@@ -39,6 +40,7 @@ export default StyleSheet.create({
     color: "white",
     fontWeight: "200",
     fontSize: 14,
-    marginTop: screenHeight * 0.05
+    marginTop: screenHeight * 0.1,
+    alignSelf: "center",
   }
 });

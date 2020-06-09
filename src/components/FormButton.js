@@ -6,7 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 const FormButton = ({ title, buttonType, ...rest }) => (
   <LinearGradient 
-    colors={['#d4586f', '#845695']} 
+    colors={['#3273A6', '#57D9CB']} 
     start={[0, 0]} 
     end={[1, 0]}
     style={{borderRadius:20}}

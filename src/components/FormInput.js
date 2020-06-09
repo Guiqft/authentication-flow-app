@@ -28,8 +28,6 @@ const styles = StyleSheet.create({
     inputContainer: {
         marginHorizontal: 10,
     },
-    input: {
-    }
 });
   
 export default FormInput;
