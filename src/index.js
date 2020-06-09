@@ -7,16 +7,16 @@ import AdmNavigation from './navigation/AdmNavigation';
 import UserNavigation from './navigation/UserNavigation';
 
 import { AuthContext } from './components/Context';
-import { getToken } from './auth';
+import { getToken, insertUser } from './auth';
 
 const Routes = () => {
-    const initialLoginState = {
+    const initialAuthState = {
         userToken: null,
         userType: null,
         isLoading: true,
     };
 
-    const loginReducer = (prevState, action) => {
+    const authReducer = (prevState, action) => {
         switch (action.type) {
             case 'RETRIEVE_TOKEN':
                 return {
@@ -39,7 +39,7 @@ const Routes = () => {
                     userType: null,
                     isLoading: false,
                 };
-            case 'REGISTER':
+            case 'SIGNUP':
                 return {
                     ...prevState,
                     userToken: action.userToken,
@@ -49,7 +49,7 @@ const Routes = () => {
         }
     }
 
-    const [loginState, dispatch] = useReducer(loginReducer, initialLoginState);
+    const [authState, dispatch] = useReducer(authReducer, initialAuthState);
 
     const authContext = useMemo(() => ({
         signIn: async (email, password) => {
@@ -93,8 +93,39 @@ const Routes = () => {
 
             dispatch({ type: "LOGOUT" });
         },
-        signUp: () => {
-            setUserToken('dasdas');
+        signUp: async (name, surname, email, password, type) => {
+            let token;
+            token = null;
+
+            let user_type;
+            user_type = null;
+
+            let data = {
+                name: name,
+                surname: surname,
+                email: email,
+                password: password,
+                type: type,
+            };
+        
+            //getting the acess token
+            const response = await insertUser(data);
+        
+            //if everything is fine
+            if (response.status === 200) {
+                //then save the token in local storage
+                token = response.data.acess_token;
+                user_type = response.data.user_type;
+                await SecureStore.setItemAsync("authorization", token);
+                await SecureStore.setItemAsync("user_type", user_type);
+            }
+            else if (response.status === 42){
+                console.log("Email already in use");
+            }
+            
+            dispatch({ type: "SIGNUP", userToken: token, userType: user_type });
+
+            return response.status;
         },
     }), []);
 
@@ -117,7 +148,7 @@ const Routes = () => {
         }, 500);
     }, []);
 
-    if (loginState.isLoading) {
+    if (authState.isLoading) {
         return (
             <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
                 <ActivityIndicator size="large" />
@@ -128,8 +159,8 @@ const Routes = () => {
     return (
         //value={authContext} pass our auth functions to the other components
         <AuthContext.Provider value={authContext}>
-            {loginState.userToken !== null ? (
-                loginState.userType === "administrator" ? (
+            {authState.userToken !== null ? (
+                authState.userType === "administrator" ? (
                     <AdmNavigation />
                 ) : (
                     <UserNavigation />

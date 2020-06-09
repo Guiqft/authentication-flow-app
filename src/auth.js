@@ -19,3 +19,21 @@ export async function getToken(data) {
         return(err.response);
     }
 };
+
+export async function insertUser(data) {
+    const headers = {
+        'Accept': 'application/json',
+        'Content-type': 'application/json',
+        'access-control-allow-origin': '*'
+    };
+    
+    try {
+        const response = await api.post('/auth/signup', data, {
+            headers: headers
+        })
+
+        return response;
+    } catch (err) {
+        return(err.response);
+    }
+};

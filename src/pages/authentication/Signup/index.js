@@ -18,6 +18,8 @@ import ErrorMessage from '../../../components/ErrorMessage';
 const validationSchema = Yup.object().shape({
     name: Yup.string()
         .required('Please enter a name'),
+    surname: Yup.string()
+        .required('Please enter a surname'),
     email: Yup.string()
         .label('Email')
         .email('Enter a valid email')
@@ -31,7 +33,7 @@ const validationSchema = Yup.object().shape({
 })
 
 const Signup = ({ navigation }) => {
-    //const { signUp } = useContext(AuthContext);
+    const { signUp } = useContext(AuthContext);
 
     const [SignupError, setSignupError] = useState(false);
 
@@ -51,16 +53,17 @@ const Signup = ({ navigation }) => {
                         Sign Up
                     </Text>
                     <Formik
-                        initialValues={{ name: '', email: '', password: '', passwordConfirmation: '' }}
+                        initialValues={{ name: '', surname: '', email: '', password: '', passwordConfirmation: '' }}
                         validationSchema={validationSchema}
 
                         //'data' gives acess to 'initialValues'
                         onSubmit={async (data) => {
-                            // var statusCode;
-                            // //calling the sigIn from our context, passing form inputs as parameter
-                            // statusCode = await signUp(data.name, data.email, data.password);
-                            // if (statusCode === 401) setSignupError(true);
-                            // else if (statusCode === 200) setSignupError(false);
+                            var statusCode;
+                            var userType = "user",
+                            //calling the sigUp from our context, passing form inputs as parameter
+                            statusCode = await signUp(data.name, data.surname, data.email, data.password, userType);
+                            if (statusCode === 401) setSignupError(true);
+                            else if (statusCode === 200) setSignupError(false);
                         }}
                     >
                         {formikProps => (
@@ -75,6 +78,16 @@ const Signup = ({ navigation }) => {
                                 />
                                 {/* .touched make the error message show only for fields that already are visited*/}
                                 <ErrorMessage errorValue={formikProps.touched.name && formikProps.errors.name} />
+                                
+                                <FormInput
+                                    name='surname'
+                                    value={formikProps.surname}
+                                    onChangeText={formikProps.handleChange('surname')}
+                                    placeholder='Surname'
+                                    autoCapitalize='none'
+                                    onBlur={formikProps.handleBlur('surname')}
+                                />                                
+                                <ErrorMessage errorValue={formikProps.touched.surname && formikProps.errors.surname} />
 
 
                                 <FormInput

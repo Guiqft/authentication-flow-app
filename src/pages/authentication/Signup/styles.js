@@ -22,7 +22,7 @@ export default StyleSheet.create({
     marginTop: screenHeight * 0.1,
     backgroundColor: "white",
     width: screenWidth * 0.8,
-    height: screenHeight * 0.55,
+    height: screenHeight * 0.6,
     borderRadius: 10,
   },
   formTitle:{
@@ -34,7 +34,8 @@ export default StyleSheet.create({
     marginBottom: screenHeight * 0.03
   },
   buttonContainer: {
-    margin: 25
+    marginHorizontal: 25,
+    marginVertical: 20,
   },
   loginButton: {
     color: "white",
